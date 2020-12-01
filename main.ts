@@ -12,7 +12,7 @@ export default class FullScreenPlugin extends Plugin {
   onunload() {}
 
   fullscreenMode() {
-    var leaf = this.app.workspace.activeLeaf;
+    var leaf = <any> this.app.workspace.activeLeaf;
     if (!leaf) return;
 
     leaf.containerEl.requestFullscreen();
