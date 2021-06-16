@@ -34,6 +34,9 @@ export default class FullScreenPlugin extends Plugin {
           el.appendChild(node);
         });
       });
+      // focus on prompt for file open
+      if (document.querySelector(".prompt-input"))
+        document.querySelector(".prompt-input").focus();
     });
 
     fullscreenMutationObserver.observe(document.body, { childList: true });
