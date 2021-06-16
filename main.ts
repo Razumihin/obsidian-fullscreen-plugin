@@ -12,9 +12,30 @@ export default class FullScreenPlugin extends Plugin {
   onunload() {}
 
   fullscreenMode() {
-    var leaf = <any> this.app.workspace.activeLeaf;
+    var leaf = this.app.workspace.activeLeaf;
     if (!leaf) return;
+    var el = leaf.containerEl;
+    var fullscreenMutationObserver;
 
-    leaf.containerEl.requestFullscreen();
+    el.requestFullscreen();
+
+    // disable mutation observer when exiting fullscreen mode
+    el.addEventListener("fullscreenchange", (event) => {
+      if (!document.fullscreenElement) {
+        fullscreenMutationObserver.disconnect();
+      }
+    });
+
+    // copy all nodes
+    fullscreenMutationObserver = new MutationObserver((mutationRecords) => {
+      mutationRecords.forEach((mutationRecord) => {
+        mutationRecord.addedNodes.forEach((node) => {
+          document.body.removeChild(node);
+          el.appendChild(node);
+        });
+      });
+    });
+
+    fullscreenMutationObserver.observe(document.body, { childList: true });
   }
 }
