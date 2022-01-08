@@ -23,6 +23,9 @@ export default class FullScreenPlugin extends Plugin {
     el.addEventListener("fullscreenchange", (event) => {
       if (!document.fullscreenElement) {
         fullscreenMutationObserver.disconnect();
+        document.body.classList.remove('fullscreen')
+      } else {
+        document.body.classList.add('fullscreen')
       }
     });
 
