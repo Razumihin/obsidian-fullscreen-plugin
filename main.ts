@@ -1,4 +1,4 @@
-import { Notice, Plugin } from "obsidian";
+import { Notice, Plugin, Scope } from "obsidian";
 
 const BODY_CLASS = "fullscreen";
 
@@ -10,6 +10,11 @@ interface FullscreenSession {
   // fullscreen element so they stay visible. They go back to <body> on exit.
   moved: Set<Node>;
   onChange: () => void;
+  // Obsidian's keymap consumes Escape and Electron does not exit element
+  // fullscreen on its own, so Esc is bound explicitly while fullscreen.
+  // Modals, menus and suggestion popups push their own scopes on top of this
+  // one, so Esc still closes those first.
+  scope: Scope;
 }
 
 export default class FullScreenPlugin extends Plugin {
@@ -22,6 +27,13 @@ export default class FullScreenPlugin extends Plugin {
       name: "Toggle fullscreen focus mode",
       callback: () => this.toggle(),
     });
+
+    // A popout window closed while fullscreen never fires fullscreenchange.
+    this.registerEvent(
+      this.app.workspace.on("window-close", (win) => {
+        if (this.session?.doc === win.doc) this.cleanup();
+      }),
+    );
   }
 
   onunload() {
@@ -29,6 +41,8 @@ export default class FullScreenPlugin extends Plugin {
   }
 
   private toggle() {
+    // The pane may have been closed while fullscreen; drop the stale session.
+    if (this.session && !this.session.el.isConnected) this.cleanup();
     if (this.session) this.exit();
     else this.enter();
   }
@@ -75,7 +89,14 @@ export default class FullScreenPlugin extends Plugin {
       }
     };
 
-    this.session = { el, doc, observer, moved, onChange };
+    const scope = new Scope(this.app.scope);
+    scope.register([], "Escape", () => {
+      this.exit();
+      return false;
+    });
+
+    this.session = { el, doc, observer, moved, onChange, scope };
+    this.app.keymap.pushScope(scope);
     doc.addEventListener("fullscreenchange", onChange);
     observer.observe(doc.body, { childList: true });
 
@@ -100,7 +121,8 @@ export default class FullScreenPlugin extends Plugin {
     if (!session) return;
     this.session = null;
 
-    const { el, doc, observer, moved, onChange } = session;
+    const { el, doc, observer, moved, onChange, scope } = session;
+    this.app.keymap.popScope(scope);
     observer.disconnect();
     doc.removeEventListener("fullscreenchange", onChange);
     doc.body.classList.remove(BODY_CLASS);
