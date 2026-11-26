@@ -5,7 +5,7 @@ Focus on a single note. This plugin takes the active pane (an editor, reading vi
 ### Features
 
 - **One command to toggle.** _Toggle fullscreen focus mode_ enters fullscreen for the active pane and, run again, exits it. Run it from the command palette or bind it to a hotkey in **Settings → Hotkeys**.
-- **`Esc` stays with the editor.** A short `Esc` press doesn't exit fullscreen. It still closes menus and popups, leaves vim insert mode, and so on. Use the toggle command to leave fullscreen.
+- **`Esc` stays with the editor.** A short `Esc` press doesn't exit fullscreen. It still closes menus and popups, leaves vim insert mode, and so on. Use the toggle command to leave fullscreen, or hold `Esc` down for a couple of seconds.
 - **The rest of Obsidian keeps working.** The command palette, quick switcher, `[[` link suggestions, context menus, modals and other popups appear on top of the fullscreen note. The quick switcher's input keeps focus, so you can open another note without leaving fullscreen.
 - **Popout windows.** Run the command in a popout window to make that window's pane fullscreen.
 - **Theme and CSS snippet hooks.** While fullscreen is on, `body` has the `fullscreen` class and the pane matches `.workspace-leaf:fullscreen`, so themes and snippets can style focus mode (see below).
@@ -51,7 +51,7 @@ Requires Obsidian 0.15.4 or newer.
 **0.1.3**
 - Fixed: the plugin failed to load on current Obsidian versions with "Class constructor … cannot be invoked without 'new'".
 - The command is now a toggle: run it again to exit fullscreen.
-- `Esc` no longer exits fullscreen, so it can be used in the editor (for example in vim mode).
+- A short `Esc` press no longer exits fullscreen, so it can be used in the editor (for example in vim mode). Hold `Esc` down to exit.
 - Menus and popups no longer get stuck in the pane after you exit fullscreen.
 - Fixed a problem where fullscreen could get stuck after its popout window or pane was closed.
 - Works in popout windows. Disabling the plugin now exits fullscreen cleanly.
