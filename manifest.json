@@ -3,7 +3,7 @@
   "name": "Fullscreen mode plugin",
   "version": "0.1.3",
   "minAppVersion": "0.15.4",
-  "description": "This plugin allows viewing a single document in fullscreen focus mode",
+  "description": "Show the active note fullscreen to focus on it, with a toggle command. Esc stays free for the editor, popups and the quick switcher still work, and popout windows are supported.",
   "author": "Razum",
   "authorUrl": "https://github.com/Razumihin",
   "isDesktopOnly": false
