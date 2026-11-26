@@ -1,4 +1,4 @@
-import { Notice, Plugin, Scope } from "obsidian";
+import { Notice, Plugin } from "obsidian";
 
 const BODY_CLASS = "fullscreen";
 
@@ -10,11 +10,6 @@ interface FullscreenSession {
   // fullscreen element so they stay visible. They go back to <body> on exit.
   moved: Set<Node>;
   onChange: () => void;
-  // Obsidian's keymap consumes Escape and Electron does not exit element
-  // fullscreen on its own, so Esc is bound explicitly while fullscreen.
-  // Modals, menus and suggestion popups push their own scopes on top of this
-  // one, so Esc still closes those first.
-  scope: Scope;
 }
 
 export default class FullScreenPlugin extends Plugin {
@@ -89,14 +84,9 @@ export default class FullScreenPlugin extends Plugin {
       }
     };
 
-    const scope = new Scope(this.app.scope);
-    scope.register([], "Escape", () => {
-      this.exit();
-      return false;
-    });
-
-    this.session = { el, doc, observer, moved, onChange, scope };
-    this.app.keymap.pushScope(scope);
+    // Esc is deliberately not bound: Obsidian keeps it for the editor (e.g. vim
+    // mode, issue 2), so fullscreen is left via the toggle command.
+    this.session = { el, doc, observer, moved, onChange };
     doc.addEventListener("fullscreenchange", onChange);
     observer.observe(doc.body, { childList: true });
 
@@ -121,8 +111,7 @@ export default class FullScreenPlugin extends Plugin {
     if (!session) return;
     this.session = null;
 
-    const { el, doc, observer, moved, onChange, scope } = session;
-    this.app.keymap.popScope(scope);
+    const { el, doc, observer, moved, onChange } = session;
     observer.disconnect();
     doc.removeEventListener("fullscreenchange", onChange);
     doc.body.classList.remove(BODY_CLASS);
