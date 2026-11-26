@@ -1,3 +1,14 @@
 ## Obsidian fullscreen plugin
 
-Adds a command to enable fullscreen focus mode for the current active leaf from the command palette or by a keyboard shortcut. `Esc` returns obsidian back to the previous layout.
+Adds a **Toggle fullscreen focus mode** command that shows the active pane in fullscreen. Run it from the command palette or bind it to a hotkey. Running the command again, or pressing `Esc`, returns Obsidian to the previous layout.
+
+While fullscreen is active, `body` has the `fullscreen` class, so themes and CSS snippets can style focus mode.
+
+Fullscreen needs the browser Fullscreen API, which Obsidian on iOS/iPadOS does not provide. There the command shows a notice instead.
+
+### Building
+
+```bash
+npm install
+npm run build
+```
