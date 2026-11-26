@@ -1,18 +1,12 @@
 import esbuild from "esbuild";
-import { builtinModules } from "node:module";
 
 const prod = process.argv[2] === "production";
 
 const context = await esbuild.context({
   entryPoints: ["main.ts"],
   bundle: true,
-  external: [
-    "obsidian",
-    "electron",
-    "@codemirror/*",
-    "@lezer/*",
-    ...builtinModules,
-  ],
+  // Provided by Obsidian at runtime. Add others only when actually imported.
+  external: ["obsidian"],
   format: "cjs",
   // Obsidian's Plugin is a native ES class; ES5 output cannot extend it.
   target: "es2018",
