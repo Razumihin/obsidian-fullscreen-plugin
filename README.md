@@ -1,6 +1,6 @@
 ## Obsidian fullscreen plugin
 
-Adds a **Toggle fullscreen focus mode** command that shows the active pane in fullscreen. Run it from the command palette or bind it to a hotkey. Running the command again returns Obsidian to the previous layout. `Esc` does not exit fullscreen, so it stays free for the editor (for example vim mode).
+Adds a **Toggle fullscreen focus mode** command that shows the active pane in fullscreen. Run it from the command palette or bind it to a hotkey. Running the command again returns Obsidian to the previous layout. A short `Esc` press does not exit fullscreen, so it stays free for the editor (for example vim mode).
 
 While fullscreen is active, `body` has the `fullscreen` class, so themes and CSS snippets can style focus mode.
 

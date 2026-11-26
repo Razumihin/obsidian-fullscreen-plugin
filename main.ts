@@ -2,6 +2,17 @@ import { Notice, Plugin } from "obsidian";
 
 const BODY_CLASS = "fullscreen";
 
+// Keyboard Lock API (Chromium); not in TypeScript's DOM typings.
+interface KeyboardLock {
+  lock(keys?: string[]): Promise<void>;
+  unlock(): void;
+}
+
+function keyboardOf(doc: Document): KeyboardLock | undefined {
+  const nav = doc.defaultView?.navigator as (Navigator & { keyboard?: KeyboardLock }) | undefined;
+  return typeof nav?.keyboard?.lock === "function" ? nav.keyboard : undefined;
+}
+
 interface FullscreenSession {
   el: HTMLElement;
   doc: Document;
@@ -84,17 +95,33 @@ export default class FullScreenPlugin extends Plugin {
       }
     };
 
-    // Esc is deliberately not bound: Obsidian keeps it for the editor (e.g. vim
-    // mode, issue 2), so fullscreen is left via the toggle command.
+    // Esc is left to the editor (e.g. vim mode, issue 2); fullscreen is left via
+    // the toggle command. Chromium/Electron exit element fullscreen on Esc
+    // before the page sees it, so Esc is locked once fullscreen (see below).
     this.session = { el, doc, observer, moved, onChange };
     doc.addEventListener("fullscreenchange", onChange);
     observer.observe(doc.body, { childList: true });
 
-    el.requestFullscreen().catch((err: unknown) => {
-      console.error("obsidian-fullscreen-plugin: requestFullscreen failed", err);
-      new Notice("Could not enter fullscreen mode.");
-      this.cleanup();
-    });
+    el.requestFullscreen()
+      .then(() => {
+        // While locked, a short Esc press goes to Obsidian; holding Esc still
+        // exits fullscreen as an escape hatch.
+        const kb = keyboardOf(doc);
+        if (!kb) return console.debug("obsidian-fullscreen-plugin: Keyboard Lock API unavailable");
+        return kb.lock(["Escape"]).then(
+          () => {
+            // Toggled off before the lock landed: release it again.
+            if (this.session?.el !== el) return kb.unlock();
+            console.debug("obsidian-fullscreen-plugin: Escape locked");
+          },
+          (err: unknown) => console.warn("obsidian-fullscreen-plugin: could not lock Escape", err),
+        );
+      })
+      .catch((err: unknown) => {
+        console.error("obsidian-fullscreen-plugin: requestFullscreen failed", err);
+        new Notice("Could not enter fullscreen mode.");
+        this.cleanup();
+      });
   }
 
   private exit() {
@@ -112,6 +139,7 @@ export default class FullScreenPlugin extends Plugin {
     this.session = null;
 
     const { el, doc, observer, moved, onChange } = session;
+    keyboardOf(doc)?.unlock();
     observer.disconnect();
     doc.removeEventListener("fullscreenchange", onChange);
     doc.body.classList.remove(BODY_CLASS);
